@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import ElementClickInterceptedException
 import time
 
 
@@ -17,6 +18,7 @@ class InstaFollower:
         inputs = self.driver.find_elements(By.CSS_SELECTOR, "input")
         inputs[0].send_keys(email)
         inputs[1].send_keys(password)
+        time.sleep(1)
         inputs[1].send_keys(Keys.ENTER)
         time.sleep(5)
         buttons = self.driver.find_elements(By.CSS_SELECTOR, "button")
@@ -35,12 +37,19 @@ class InstaFollower:
         time.sleep(3)
         follower_click = self.driver.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[2]/a/div')
         follower_click.click()
-        time.sleep(2)
-        scrollable = self.driver.find_element(By.CSS_SELECTOR, "li button")
-        scrollable.send_keys(Keys.END)
-        time.sleep(300)
+        time.sleep(5)
+        scrollable = self.driver.find_element(By.CSS_SELECTOR, ".isgrP")
+        for i in range(5):
+            self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scrollable)
+            time.sleep(1)
+        time.sleep(3)
 
     def follow(self):
         to_follow = self.driver.find_elements(By.CSS_SELECTOR, "li button")
         for followable in to_follow:
-            followable.click()
+            try:
+                followable.click()
+                time.sleep(1)
+            except ElementClickInterceptedException:
+                self.driver.find_element(By.XPATH, '/html/body/div[7]/div/div/div/div[3]/button[2]').click()
+        time.sleep(300)
